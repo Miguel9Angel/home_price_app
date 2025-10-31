@@ -8,17 +8,26 @@ import matplotlib.pyplot as plt
 from xgboost import plot_importance
 model_filename = '../model/best_xgb_pipeline.pkl'
 
+feature_names = [
+    "longitude", "latitude", "constructed_area", "house_age",
+    "administration", "floor", "stratum", "bathrooms",
+    "bedrooms", "parking"
+]
+
 @st.cache_resource
 def load_model():
     try:
         loaded_model = joblib.load(model_filename)
+        xgb_model = loaded_model.named_steps['regressor']
+        xgb_model.feature_names_in_ = feature_names
         print(f"Model '{model_filename}' loaded successfully.")
         return loaded_model
     except FileNotFoundError:
         print(f"Error: The file '{model_filename}' was not found. Check the path.")
-        exit()
+        st.error(f"Error: The model file '{model_filename}' was not found.")
+        return None
 
-loaded_model = load_model()
+loaded_model = load_model(feature_names)
     
 @st.cache_data
 def load_data():
@@ -321,6 +330,13 @@ with tab3: # Suponiendo que esta es la pestaña 3
     fig6, ax6 = plt.subplots(figsize=(10,6))
     xgb_model = loaded_model.named_steps['regressor']
     plot_importance(xgb_model, ax=ax6,max_num_features=12, height=0.5)
+    plot_importance(
+        xgb_model, 
+        ax=ax6,
+        max_num_features=10, 
+        height=0.5,
+        show_values=False 
+    )
     plt.title('Features importance (XGBoost)')
     plt.tight_layout()
     st.pyplot(fig6)

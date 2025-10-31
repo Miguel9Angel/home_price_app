@@ -15,7 +15,7 @@ feature_names = [
 ]
 
 @st.cache_resource
-def load_model():
+def load_model(feature_names):
     try:
         loaded_model = joblib.load(model_filename)
         xgb_model = loaded_model.named_steps['regressor']

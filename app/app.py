@@ -23,9 +23,7 @@ def load_model(feature_names):
         print(f"Model '{model_filename}' loaded successfully.")
         return loaded_model
     except FileNotFoundError:
-        print(f"Error: The file '{model_filename}' was not found. Check the path.")
-        st.error(f"Error: The model file '{model_filename}' was not found.")
-        return None
+        return pd.read_csv('./data/apartments_bogota.csv')
 
 loaded_model = load_model(feature_names)
     

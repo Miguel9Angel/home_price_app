@@ -1,7 +1,6 @@
 import streamlit as st 
 import pandas as pd
 import pydeck as pdk
-from geopy.geocoders import Nominatim
 import requests
 import joblib
 import seaborn as sns
@@ -212,14 +211,15 @@ with tab2:
     #-------
     st.subheader('Rental Cost per square meter by District')
 
-    st.write('')
+    st.write('The rent price per square meter keep Chapinero as one of the most expensives in the city, with others districs like Santa Fe and Candelaria which are the city center, and keeping Bosa as the cheapest distric to live.')
 
     fig4, ax4 = plt.subplots(figsize=(10, 6))
     fig4.patch.set_facecolor('#F0F0F0') 
     ax4.set_facecolor('#EAEAEA')
 
-    data['rent_per_m2'] = data['rent_price']/data['constructed_area']
-    renta_cost_square_meter = data.groupby('Localidad')['rent_per_m2'].mean().sort_values(ascending=False)
+    data_clean = data[data['constructed_area']>0].copy()
+    data_clean['rent_per_m2'] = data_clean['rent_price']/data_clean['constructed_area']
+    renta_cost_square_meter = data_clean.groupby('Localidad')['rent_per_m2'].mean().sort_values(ascending=False)
     print(renta_cost_square_meter.values)
     bar_color = '#778899'
     sns.barplot(
@@ -241,3 +241,69 @@ with tab2:
     plt.tight_layout()
 
     st.pyplot(fig4)
+    
+    #-----BoxPlot stratum
+    st.subheader('Rental Price y Stratum')
+    st.write("The data exhibits a strong , positive correlation between the socio-economic stratum and the rental price, confirming the expected market dynamics")
+    
+    sns.set_style('darkgrid')
+    
+    fig5, ax5 = plt.subplots(figsize=(10,6))
+    sns.boxplot(
+        x = 'stratum',
+        y='rent_price',
+        data=apto_data,
+        ax=ax5,
+        palette='Blues_d',
+        medianprops={'color':'darkred', 'linewidth':2}
+    )
+    
+    ax5.set_title('Rental price distribution by stratum', fontsize=16)
+    ax5.set_xlabel('Stratum')
+    ax5.set_ylabel('Rental Price (COP)')
+    
+    sns.despine(left=True, bottom=True)
+    plt.tight_layout()
+    
+    st.pyplot(fig5)
+    
+with tab3: # Suponiendo que esta es la pestaña 3
+    st.header("Methodology and Model Evaluation")
+    
+    st.subheader("Origin and Preparation of Data")
+    st.markdown("""
+        All the data was obtained from the FincaRaiz website using the BeautifulSoup library to extract the required features, resulting in a total of 8,562 records collected.
+        The steps of the cleaning process were:
+        * All the outliers were handled with different tehcniques depending on the variable context. Check my Github for more details.
+        * Finca Raiz website provides information about the apartment facilities available. However, after performing a mutual information regression analysis between the input
+        and output variables, these facilities were found to hace less than 1% predictive power.
+    """)
+    
+    st.subheader("Model Predictor 🧠")
+    st.markdown("""
+        Four of the basic Machine learning models were used LinearRegression, LassoCV, RandomForest and XGBoost these last two models were the better ones with the lowest RMSE value.
+    """)
+    data_models = {
+        'Model': ['XGBoost', 'RandomForest', 'LinearRegression', 'LassoCV'],
+        'RMSE Mean': [1.712468e+06, 1.724811e+06, 2.066443e+06, 2.066493e+06],
+        'RSME Std': [95403.742644, 102536.007085, 97564.781750, 97411.108760]
+    }
+    df_models = pd.DataFrame(data_models)
+    df_models = df_models.sort_values(by='RMSE Mean', ascending=True).reset_index(drop=True)
+    st.dataframe(df_models,
+                hide_index=True,
+                use_container_width=True)
+    
+    st.subheader("3. Evaluación del Rendimiento (RMSE) 📉")
+    st.info(f"""
+        **Resultado de la Evaluación (Test Set):**
+        * **RMSE:** **\$750,520 COP** (Ejemplo)
+    """)
+    st.markdown("""
+        El **RMSE (Root Mean Squared Error)** es la métrica principal. Un RMSE de $750.520 COP significa que el error promedio de la predicción del modelo es de **\$750.520** con respecto al precio real del arriendo.
+    """)
+    
+    st.subheader("Importancia de las Variables")
+    #st.image("ruta/a/tu/feature_importance.png")
+    # O un simple st.dataframe mostrando el ranking de importancia
+    

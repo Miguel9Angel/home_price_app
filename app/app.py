@@ -6,6 +6,14 @@ import joblib
 import seaborn as sns
 import matplotlib.pyplot as plt
 from xgboost import plot_importance
+
+st.set_page_config(
+    page_title="Bogotá Rent Price Prediction",  
+    page_icon="🏙️",                            
+    layout="wide",                             
+    initial_sidebar_state="expanded"     
+)
+
 model_filename = '../model/best_xgb_pipeline.pkl'
 
 @st.cache_resource

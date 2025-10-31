@@ -8,14 +8,23 @@ import matplotlib.pyplot as plt
 from xgboost import plot_importance
 model_filename = '../model/best_xgb_pipeline.pkl'
 
-try:
-    loaded_model = joblib.load(model_filename)
-    print(f"Model '{model_filename}' loaded successfully.")
-except FileNotFoundError:
-    print(f"Error: The file '{model_filename}' was not found. Check the path.")
-    exit()
+@st.cache_resource
+def load_model():
+    try:
+        loaded_model = joblib.load(model_filename)
+        print(f"Model '{model_filename}' loaded successfully.")
+        return loaded_model
+    except FileNotFoundError:
+        print(f"Error: The file '{model_filename}' was not found. Check the path.")
+        exit()
 
-data = pd.read_csv('../data/apartments_bogota.csv')
+loaded_model = load_model()
+    
+@st.cache_data
+def load_data():
+    return pd.read_csv('../data/apartments_bogota.csv')
+
+data = load_data()
 apto_data = data.copy()
 
 tab1, tab2, tab3 = st.tabs(["🏠 Make a prediction", "📊 Market Analisys (EDA)", "🧠 Methodology"])
@@ -296,7 +305,7 @@ with tab3: # Suponiendo que esta es la pestaña 3
     
     st.info(f"""
         **The model with the best results is XGBoost (Test Set):**
-        * **RMSE Mean:** **\$1.712.468 COP**
+        * **RMSE Mean:** **$1.712.468 COP**
     """)
     st.markdown("""
         The mean error of the model's predictio is approximately 1.712.468 COP. This is mainly due to some apartments with very high rental prices.

@@ -44,7 +44,9 @@ def load_model():
         return None
 
 loaded_model = load_model()
-    
+if loaded_model is None:
+    st.error("🚨 File wasn't found")
+    st.stop()
 @st.cache_data
 def load_data():
     try:
@@ -348,7 +350,7 @@ with tab3: # Suponiendo que esta es la pestaña 3
     
     fig6, ax6 = plt.subplots(figsize=(10,6))
     xgb_model = loaded_model.named_steps['regressor']
-    plot_importance(xgb_model, ax=ax6,max_num_features=12, height=0.5)
+   
     plot_importance(
         xgb_model, 
         ax=ax6,

@@ -8,12 +8,6 @@ import matplotlib.pyplot as plt
 from xgboost import plot_importance
 model_filename = '../model/best_xgb_pipeline.pkl'
 
-feature_names = [
-    "longitude", "latitude", "constructed_area", "house_age",
-    "administration", "floor", "stratum", "bathrooms",
-    "bedrooms", "parking"
-]
-
 @st.cache_resource
 def load_model(): 
     try:
@@ -34,9 +28,6 @@ def load_model():
         if loaded_model is None:
             raise FileNotFoundError(f"Model not found in any path: {paths_to_try}")
 
-        xgb_model = loaded_model.named_steps['regressor']
-        xgb_model.feature_names_in_ = feature_names
-        
         return loaded_model
     except Exception as e:
         print(f"Error loading model: {e}")

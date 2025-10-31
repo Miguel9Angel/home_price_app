@@ -5,7 +5,7 @@ import requests
 import joblib
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from xgboost import plot_importance
 model_filename = '../model/best_xgb_pipeline.pkl'
 
 try:
@@ -294,16 +294,53 @@ with tab3: # Suponiendo que esta es la pestaña 3
                 hide_index=True,
                 use_container_width=True)
     
-    st.subheader("3. Evaluación del Rendimiento (RMSE) 📉")
     st.info(f"""
-        **Resultado de la Evaluación (Test Set):**
-        * **RMSE:** **\$750,520 COP** (Ejemplo)
+        **The model with the best results is XGBoost (Test Set):**
+        * **RMSE Mean:** **\$1.712.468 COP**
     """)
     st.markdown("""
-        El **RMSE (Root Mean Squared Error)** es la métrica principal. Un RMSE de $750.520 COP significa que el error promedio de la predicción del modelo es de **\$750.520** con respecto al precio real del arriendo.
+        The mean error of the model's predictio is approximately 1.712.468 COP. This is mainly due to some apartments with very high rental prices.
+        Apartments with rents above 8.000.0000 COP show significant variability in the prediction process, whereas the model performs much
+        better for lower-priced apartments.
     """)
     
-    st.subheader("Importancia de las Variables")
-    #st.image("ruta/a/tu/feature_importance.png")
-    # O un simple st.dataframe mostrando el ranking de importancia
+    st.subheader("Features Importance")
+    st.write('''
+        The next plot shows the importance score of each feature in the model training procces
+    ''')
     
+    fig6, ax6 = plt.subplots(figsize=(10,6))
+    xgb_model = loaded_model.named_steps['regressor']
+    plot_importance(xgb_model, ax=ax6,max_num_features=12, height=0.5)
+    plt.title('Features importance (XGBoost)')
+    plt.tight_layout()
+    st.pyplot(fig6)
+
+    feature_data = {
+    "Feature": [
+        "f0", "f1", "f2", "f3", "f4", 
+        "f5", "f6", "f7", "f8", "f9"
+    ],
+    "Description": [
+        "longitude", "latitude", "constructed_area", "house_age",
+        "administration", "floor", "stratum", "bathrooms",
+        "bedrooms", "parking"
+    ]
+    }
+
+    features_df = pd.DataFrame(feature_data)
+
+    st.subheader("Feature Index Mapping")
+    st.write('This shows that location is the most important feature for determining the rental price of apartment.' \
+                'Next, the constructed area can be seen as one of the most relevant features, while parking is the least important of all.')
+    st.dataframe(features_df, use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("🔗 Project Repository")
+
+    st.markdown("""
+    For more details about the data collection process, preprocessing pipeline, and model training code,  
+    visit my GitHub repository:
+
+    👉 [**Miguel Soler — Home Price Prediction Bogota (GitHub)**](https://github.com/Miguel9Angel/home_price_bogota)
+    """)

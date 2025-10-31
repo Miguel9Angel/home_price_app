@@ -23,13 +23,17 @@ def load_model(feature_names):
         print(f"Model '{model_filename}' loaded successfully.")
         return loaded_model
     except FileNotFoundError:
-        return pd.read_csv('./data/apartments_bogota.csv')
+        print(f"Error: The file '{model_filename}' was not found. Check the path.")
+        return None
 
 loaded_model = load_model(feature_names)
     
 @st.cache_data
 def load_data():
-    return pd.read_csv('../data/apartments_bogota.csv')
+    try:
+        return pd.read_csv('../data/apartments_bogota.csv') 
+    except FileNotFoundError:
+        return pd.read_csv('./data/apartments_bogota.csv')
 
 data = load_data()
 apto_data = data.copy()

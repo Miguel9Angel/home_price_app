@@ -15,18 +15,35 @@ feature_names = [
 ]
 
 @st.cache_resource
-def load_model(feature_names):
+def load_model(): 
     try:
-        loaded_model = joblib.load(model_filename)
+        paths_to_try = [
+            '../model/best_xgb_pipeline.pkl', 
+            './model/best_xgb_pipeline.pkl'   
+        ]
+        
+        loaded_model = None
+        for path in paths_to_try:
+            try:
+                loaded_model = joblib.load(path)
+                print(f"Model '{path}' loaded successfully.")
+                break
+            except FileNotFoundError:
+                continue 
+        
+        if loaded_model is None:
+            raise FileNotFoundError(f"Model not found in any path: {paths_to_try}")
+
         xgb_model = loaded_model.named_steps['regressor']
         xgb_model.feature_names_in_ = feature_names
-        print(f"Model '{model_filename}' loaded successfully.")
+        
         return loaded_model
-    except FileNotFoundError:
-        print(f"Error: The file '{model_filename}' was not found. Check the path.")
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        st.error(f"Error loading model: {e}")
         return None
 
-loaded_model = load_model(feature_names)
+loaded_model = load_model()
     
 @st.cache_data
 def load_data():
